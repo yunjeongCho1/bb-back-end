@@ -4,6 +4,10 @@ const router = express.Router();
 
 const User = require("../schema/userschema");
 
+require("dotenv").config();
+var secret_key = process.env.SECRET_KEY;
+const jwt = require("jsonwebtoken");
+
 // user data save
 router.post("/signup", async (req, res) => {
   try {
@@ -46,4 +50,41 @@ router.post("/checkemail", async (req, res) => {
     res.status(503).send("Error checking email");
   }
 });
+
+//login
+router.post("/signin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      console.log(user.password);
+      const pwcheck = await bcrypt.compare(password, user.password);
+      console.log(pwcheck);
+
+      if (!pwcheck) {
+        res.status(200).send("ID or PW error");
+      } else {
+        const payload = {
+          useremail: "lalalala",
+        };
+        console.log(secret_key);
+        const token = jwt.sign(payload, secret_key, { expiresIn: "6h" });
+
+        //response
+        res.status(200).json({
+          code: 200,
+          message: "토큰이 발급되었습니다.",
+          token: token,
+        });
+        console.log(token);
+      }
+    } else {
+      res.status(200).send("ID or PW error");
+    }
+  } catch (error) {
+    console.error("User Error", error);
+    res.status(500).send("User Error");
+  }
+});
+
 module.exports = router;

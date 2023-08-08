@@ -10,9 +10,11 @@ app.use(cors());
 const userRouter = require("./routes/user");
 const reviewRouter = require("./routes/review");
 const searchRouter = require("./routes/search");
+const bookRouter = require("./routes/book");
 app.use("/api/user", userRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/search", searchRouter);
+app.use("/api/book", bookRouter);
 
 //mongodb 연결
 const mongoose = require("mongoose");

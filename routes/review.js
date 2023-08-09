@@ -1,13 +1,25 @@
 const express = require("express");
 const router = express.Router();
 
+const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
 
-// review save
-router.post("/new", async (req, res) => {
+// review save/write
+router.post("/new", authMiddleware, async (req, res) => {
   try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+
+    const user = await User.findById(decoded._id);
     const { book, rating, text, date } = req.body;
-    const newReview = new Review({ book, rating, text, date });
+
+    const newReview = new Review({
+      book,
+      rating,
+      text,
+      date,
+      user_id: user._id,
+    });
     await newReview.save();
 
     console.log("Review saved successfully:", newReview);
@@ -19,7 +31,7 @@ router.post("/new", async (req, res) => {
 });
 
 // review load
-router.get("/list", async (req, res) => {
+router.get("/list", authMiddleware, async (req, res) => {
   try {
     let reviews = await Review.find().sort({ date: -1 });
 
@@ -33,7 +45,7 @@ router.get("/list", async (req, res) => {
     if (req.query.sort === "date_asc") {
       reviews = reviews.reverse();
     }
-    console.log("!!!!!", req.query.sort);
+    console.log("review.js_sort: ", req.query.sort, "\n" + "-----------------");
     //console.log("review get:", reviews);
     res.status(200).json(reviews);
   } catch (error) {
@@ -43,7 +55,7 @@ router.get("/list", async (req, res) => {
 });
 
 //특정 review(id) load
-router.get("/detail/:id", async (req, res) => {
+router.get("/detail/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     //console.log(req.params);
@@ -57,13 +69,21 @@ router.get("/detail/:id", async (req, res) => {
 });
 
 //특정 review delete
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(req.params);
-    const del_review = await Review.findByIdAndDelete(id);
-    console.log(del_review);
-    res.status(200).json(del_review);
+
+    const review = await Review.findById(id);
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
+    if (user._id === review.user_id) {
+      const del_review = await Review.findByIdAndDelete(id);
+      console.log(del_review);
+      res.status(200).json(del_review);
+    }
   } catch (error) {
     console.error("Error delete : ", error);
     res.status(500).send("Error delete");
@@ -71,16 +91,23 @@ router.delete("/:id", async (req, res) => {
 });
 
 //특정 review 수정
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, text } = req.body;
-    const up_review = await Review.findByIdAndUpdate(id, {
-      rating: rating,
-      text: text,
-    });
-    console.log(up_review);
-    res.status(200).json(up_review);
+    const review = await Review.findById(id);
+
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+    if (user._id === review.user_id) {
+      const up_review = await Review.findByIdAndUpdate(id, {
+        rating: rating,
+        text: text,
+      });
+      console.log(up_review);
+      res.status(200).json(up_review);
+    }
   } catch (error) {
     console.error("Error update : ", error);
     res.status(500).send("Error update");

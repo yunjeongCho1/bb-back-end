@@ -6,6 +6,11 @@ app.use(express.json());
 var cors = require("cors");
 app.use(cors());
 
+const jwt = require("jsonwebtoken");
+
+require("dotenv").config();
+var secret_key = process.env.SECRET_KEY;
+
 //routes
 const userRouter = require("./routes/user");
 const reviewRouter = require("./routes/review");
@@ -26,11 +31,28 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB Connected"))
+  .then(() => console.log("MongoDB Connected" + "\n" + "---------------------"))
   .catch((err) => console.log(err));
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+app.get("/api/verify-token", (req, res) => {
+  const token = req.headers.authorization;
+  console.log("server.js: ", token);
+
+  if (!token) {
+    return res.json({ valid: false });
+  }
+
+  jwt.verify(token.split(" ")[1], secret_key, (err, decoded) => {
+    if (err) {
+      return res.json({ valid: false });
+    }
+    // Token is valid
+    return res.json({ valid: true });
+  });
 });
 
 // 포트 8000번 연결

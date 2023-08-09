@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const User = require("../schema/userschema");
 
@@ -14,8 +15,8 @@ router.post("/signup", async (req, res) => {
     const { email, password } = req.body;
     const emailReg = /^[\w.-]+@[a-zA-Z\d.-]+.[a-zA-Z]{2,}$/;
     const passwordReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
-    console.log(emailReg.test(email), passwordReg.test(password));
-    console.log(password);
+    //console.log(emailReg.test(email), passwordReg.test(password));
+    //console.log(password);
     if (emailReg.test(email) && passwordReg.test(password)) {
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
@@ -57,17 +58,18 @@ router.post("/signin", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-      console.log(user.password);
+      //console.log(user.password);
       const pwcheck = await bcrypt.compare(password, user.password);
-      console.log(pwcheck);
+      console.log("user.js_ id : ", user._id.toString());
+      console.log("user.js_pwcheck : ", pwcheck);
 
       if (!pwcheck) {
         res.status(200).send("ID or PW error");
       } else {
         const payload = {
-          useremail: "lalalala",
+          _id: user._id.toString(),
         };
-        console.log(secret_key);
+        //console.log(secret_key);
         const token = jwt.sign(payload, secret_key, { expiresIn: "6h" });
 
         //response
@@ -76,7 +78,7 @@ router.post("/signin", async (req, res) => {
           message: "토큰이 발급되었습니다.",
           token: token,
         });
-        console.log(token);
+        //console.log(token);
       }
     } else {
       res.status(200).send("ID or PW error");
@@ -84,6 +86,21 @@ router.post("/signin", async (req, res) => {
   } catch (error) {
     console.error("User Error", error);
     res.status(500).send("User Error");
+  }
+});
+
+router.get("/info", authMiddleware, async (req, res) => {
+  const token = req.headers.authorization;
+
+  try {
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    console.log("Decoded Token:", decoded);
+    const user = await User.findById(decoded._id);
+    console.log("user.js : ", user, +"\n" + "-------------------");
+    res.status(200).send(user);
+  } catch (error) {
+    console.error("Error decoding token:", error.message);
+    res.status(500).send("user.js : error", error.message);
   }
 });
 

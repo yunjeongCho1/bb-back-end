@@ -89,6 +89,7 @@ router.post("/signin", async (req, res) => {
   }
 });
 
+//회원정보출력 (마이페이지)
 router.get("/info", authMiddleware, async (req, res) => {
   const token = req.headers.authorization;
 
@@ -101,6 +102,60 @@ router.get("/info", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error decoding token:", error.message);
     res.status(500).send("user.js : error", error.message);
+  }
+});
+
+//회원탈퇴
+router.post("/delete_account", authMiddleware, async (req, res) => {
+  const token = req.headers.authorization;
+  try {
+    const { password } = req.body;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+    if (user) {
+      const pwcheck = await bcrypt.compare(password, user.password);
+
+      if (!pwcheck) {
+        res.status(200).send("ID or PW error");
+      } else {
+        await Review.deleteMany({ user_id: user._id });
+        const del_user = await User.findByIdAndDelete(user._id);
+        console.log("delete: ", del_user);
+        res.status(200).json(del_user);
+      }
+    }
+  } catch (error) {
+    console.error("user.js delete error:", error.message);
+    res.status(500).send("delete error", error.message);
+  }
+});
+
+// pw 변경
+router.put("/change_password", authMiddleware, async (req, res) => {
+  const token = req.headers.authorization;
+  try {
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
+    if (user) {
+      const { currentPw, newPw } = req.body;
+
+      const currentPw_valid = await bcrypt.compare(currentPw, user.password);
+      if (!currentPw_valid) {
+        return res.status(200).json("PW Error");
+      }
+
+      const newPassword = await bcrypt.hash(newPw, 10);
+      user.password = newPassword;
+      await user.save();
+
+      res
+        .status(200)
+        .json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+    }
+  } catch (error) {
+    console.error("user.js change password error:", error.message);
+    res.status(500).send("PW Error", error.message);
   }
 });
 

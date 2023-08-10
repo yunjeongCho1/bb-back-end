@@ -3,6 +3,11 @@ const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
+const User = require("../schema/userschema");
+
+require("dotenv").config();
+var secret_key = process.env.SECRET_KEY;
+const jwt = require("jsonwebtoken");
 
 // review save/write
 router.post("/new", authMiddleware, async (req, res) => {
@@ -33,7 +38,13 @@ router.post("/new", authMiddleware, async (req, res) => {
 // review load
 router.get("/list", authMiddleware, async (req, res) => {
   try {
-    let reviews = await Review.find().sort({ date: -1 });
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
+    let reviews = await Review.find({
+      user_id: user._id,
+    }).sort({ date: -1 });
 
     if (req.query.sort === "title") {
       reviews.sort((a, b) => a.book.title.localeCompare(b.book.title));
@@ -113,4 +124,41 @@ router.put("/:id", authMiddleware, async (req, res) => {
     res.status(500).send("Error update");
   }
 });
+
+// 백업
+const fs = require("fs");
+const path = require("path");
+
+router.get("/backup", authMiddleware, async (req, res) => {
+  const token = req.headers.authorization;
+  try {
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
+    if (user) {
+      const reviews = await Review.find({ user_id: user._id });
+
+      const backupData = {
+        user: user.email,
+        reviews: reviews,
+      };
+
+      const backupFileName = `test1_backup.json`;
+      const backupFilePath = path.join(__dirname, "backups", backupFileName);
+
+      fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
+
+      res.download(backupFilePath, backupFileName, () => {
+        // 다운로드 후 백업 파일 삭제
+        fs.unlinkSync(backupFilePath);
+      });
+    } else {
+      res.status(500).json({ message: "유저를 찾을 수 없습니다." });
+    }
+  } catch (error) {
+    console.error("user.js backup error:", error.message);
+    res.status(500).send("backup error", error.message);
+  }
+});
+
 module.exports = router;

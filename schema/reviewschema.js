@@ -14,6 +14,7 @@ const reviewSchema = new mongoose.Schema(
     text: String,
     user_id: String,
     date: Date,
+    status: String,
   },
   { versionKey: false }
 );

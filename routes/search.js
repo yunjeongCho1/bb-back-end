@@ -1,9 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Review = require("../schema/reviewschema");
+const authMiddleware = require("../middleware/authMiddleware");
+const User = require("../schema/userschema");
 
 require("dotenv").config();
 var api_key = process.env.API_KEY;
+var secret_key = process.env.SECRET_KEY;
+
+const jwt = require("jsonwebtoken");
 
 router.get("/book", function (req, res) {
   var api_url = `https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=${api_key}&Query=${encodeURI(
@@ -25,11 +30,18 @@ router.get("/book", function (req, res) {
 });
 
 // 후기 검색
-router.get("/review", async (req, res) => {
+router.get("/review", authMiddleware, async (req, res) => {
   try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
     const result = await Review.find({
+      user_id: user._id,
+      status: "upload",
       "book.title": { $regex: req.query.query, $options: "i" },
     });
+
     console.log("!!!!!!!!!!", req.query);
     console.log("Result:", result);
     res.status(200).json(result);

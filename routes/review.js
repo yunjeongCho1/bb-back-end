@@ -16,19 +16,35 @@ router.post("/new", authMiddleware, async (req, res) => {
     const decoded = jwt.verify(token.split(" ")[1], secret_key);
 
     const user = await User.findById(decoded._id);
-    const { book, rating, text, date } = req.body;
+    const { book, rating, text, date, status } = req.body;
 
-    const newReview = new Review({
-      book,
-      rating,
-      text,
-      date,
+    const result = await Review.findOne({
       user_id: user._id,
+      "book.title": book.title,
+      status: "save",
     });
-    await newReview.save();
+    if (!result) {
+      const newReview = new Review({
+        book,
+        rating,
+        text,
+        date,
+        user_id: user._id,
+        status,
+      });
+      await newReview.save();
+      console.log("Review uploaded successfully:", newReview);
+    } else {
+      const up_review = await Review.findByIdAndUpdate(result._id, {
+        rating,
+        text,
+        date,
+        status,
+      });
+      console.log("리뷰saved", up_review);
+    }
 
-    console.log("Review saved successfully:", newReview);
-    res.status(200).send("Review saved successfully");
+    res.status(200).send("Review uploaded successfully");
   } catch (error) {
     console.error("Error", error);
     res.status(500).send("Error");
@@ -44,13 +60,11 @@ router.get("/list", authMiddleware, async (req, res) => {
 
     let reviews = await Review.find({
       user_id: user._id,
+      status: "upload",
     }).sort({ date: -1 });
 
     if (req.query.sort === "title") {
       reviews.sort((a, b) => a.book.title.localeCompare(b.book.title));
-      // } else if (req.query.sort === "title") {
-      //   reviews.sort((a, b) => b.book.title.localeCompare(a.book.title));
-      // }
     }
 
     if (req.query.sort === "date_asc") {
@@ -65,13 +79,30 @@ router.get("/list", authMiddleware, async (req, res) => {
   }
 });
 
+// 임시저장 조회
+router.get("/saved", authMiddleware, async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token.split(" ")[1], secret_key);
+    const user = await User.findById(decoded._id);
+
+    let reviews = await Review.find({
+      user_id: user._id,
+      status: "save",
+    }).sort({ date: -1 });
+
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error 임시저장: ", error);
+    res.status(500).send("Error load review");
+  }
+});
+
 //특정 review(id) load
 router.get("/detail/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    //console.log(req.params);
     const id_review = await Review.findById(id);
-    //console.log(id_review);
     res.status(200).json(id_review);
   } catch (error) {
     console.error("Error load id: ", error);
@@ -86,11 +117,12 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     console.log(req.params);
 
     const review = await Review.findById(id);
+    //console.log(review);
     const token = req.headers.authorization;
     const decoded = jwt.verify(token.split(" ")[1], secret_key);
     const user = await User.findById(decoded._id);
 
-    if (user._id === review.user_id) {
+    if (user._id.toString() === review.user_id) {
       const del_review = await Review.findByIdAndDelete(id);
       console.log(del_review);
       res.status(200).json(del_review);
@@ -111,7 +143,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     const token = req.headers.authorization;
     const decoded = jwt.verify(token.split(" ")[1], secret_key);
     const user = await User.findById(decoded._id);
-    if (user._id === review.user_id) {
+    if (user._id.toString() === review.user_id) {
       const up_review = await Review.findByIdAndUpdate(id, {
         rating: rating,
         text: text,

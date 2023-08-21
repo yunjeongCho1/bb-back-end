@@ -4,7 +4,12 @@ const mongoose = require("mongoose");
 const likeSchema = new mongoose.Schema(
   {
     isbn: String,
-    users: [String],
+    users: [
+      {
+        userId: String,
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
   },
   { versionKey: false }
 );

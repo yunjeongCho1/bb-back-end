@@ -15,8 +15,6 @@ router.post("/signup", async (req, res) => {
     const { email, password } = req.body;
     const emailReg = /^[\w.-]+@[a-zA-Z\d.-]+.[a-zA-Z]{2,}$/;
     const passwordReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
-    //console.log(emailReg.test(email), passwordReg.test(password));
-    //console.log(password);
     if (emailReg.test(email) && passwordReg.test(password)) {
       const existingUser = await User.findOne({ email });
       if (!existingUser) {

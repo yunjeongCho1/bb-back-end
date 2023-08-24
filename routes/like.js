@@ -90,7 +90,16 @@ router.get("/list", authMiddleware, async (req, res) => {
     ); // ISBN만 추출하여 새로운 배열 생성
     const apiRequests = apiUrls.map((url) => axios.get(url)); // API 요청을 생성하여 배열로 저장
     const apiResponses = await Promise.all(apiRequests); // 모든 API 요청을 병렬로 실행하고 응답을 받음
-    const combinedData = apiResponses.map((response) => response.data); // 각 응답에서 데이터 추출
+
+    //0821에 새로 추가한 코드
+    let combinedData = apiResponses.map((response) => response.data.item[0]);
+    if (req.query.sort === "date_asc")
+      // 정렬
+      combinedData = [...combinedData].reverse();
+    if (req.query.sort === "title")
+      combinedData = [...combinedData].sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
     res.status(200).json(combinedData); // 모든 데이터를 클라이언트에 응답
     //console.log("like.js likes: ", apiUrls);
   } catch (error) {

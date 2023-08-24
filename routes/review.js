@@ -34,6 +34,7 @@ router.post("/new", authMiddleware, async (req, res) => {
       });
       await newReview.save();
       console.log("Review uploaded successfully:", newReview);
+      res.status(200).send(newReview._id);
     } else {
       const up_review = await Review.findByIdAndUpdate(result._id, {
         rating,
@@ -42,9 +43,8 @@ router.post("/new", authMiddleware, async (req, res) => {
         status,
       });
       console.log("리뷰saved", up_review);
+      res.status(200).send(up_review._id);
     }
-
-    res.status(200).send("Review uploaded successfully");
   } catch (error) {
     console.error("Error", error);
     res.status(500).send("Error");

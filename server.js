@@ -17,12 +17,14 @@ const reviewRouter = require("./routes/review");
 const searchRouter = require("./routes/search");
 const bookRouter = require("./routes/book");
 const likeRouter = require("./routes/like");
+const recommendRouter = require("./routes/recommend");
 
 app.use("/api/user", userRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/book", bookRouter);
 app.use("/api/like", likeRouter);
+app.use("/api/recommend", recommendRouter);
 
 //mongodb 연결
 const mongoose = require("mongoose");

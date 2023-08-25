@@ -13,9 +13,7 @@ const jwt = require("jsonwebtoken");
 
 router.get("/book/:isbn", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     const { isbn } = req.params;
     const like = await Like.findOne({ isbn });
@@ -33,9 +31,7 @@ router.get("/book/:isbn", authMiddleware, async (req, res) => {
 
 router.post("", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     const { isbn } = req.body;
     const like = await Like.findOne({ isbn });
@@ -75,9 +71,7 @@ router.post("", authMiddleware, async (req, res) => {
 
 router.get("/list", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     let likes = await Like.find({
       "users.userId": user._id.toString(),

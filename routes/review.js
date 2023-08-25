@@ -12,10 +12,7 @@ const jwt = require("jsonwebtoken");
 // review save/write
 router.post("/new", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
     const { book, rating, text, date, status } = req.body;
 
     const result = await Review.findOne({
@@ -54,9 +51,7 @@ router.post("/new", authMiddleware, async (req, res) => {
 // review load
 router.get("/list", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     let reviews = await Review.find({
       user_id: user._id,
@@ -82,9 +77,7 @@ router.get("/list", authMiddleware, async (req, res) => {
 // 임시저장 조회
 router.get("/saved", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     let reviews = await Review.find({
       user_id: user._id,
@@ -117,10 +110,8 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     console.log(req.params);
 
     const review = await Review.findById(id);
-    //console.log(review);
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+
+    const user = await User.findById(req.user._id);
 
     if (user._id.toString() === review.user_id) {
       const del_review = await Review.findByIdAndDelete(id);
@@ -140,9 +131,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     const { rating, text } = req.body;
     const review = await Review.findById(id);
 
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
     if (user._id.toString() === review.user_id) {
       const up_review = await Review.findByIdAndUpdate(id, {
         rating: rating,
@@ -162,10 +151,8 @@ const fs = require("fs");
 const path = require("path");
 
 router.get("/backup", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization;
   try {
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     if (user) {
       const reviews = await Review.find({ user_id: user._id });

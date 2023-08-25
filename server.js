@@ -45,7 +45,7 @@ app.get("/", (req, res) => {
 
 app.get("/api/verify-token", (req, res) => {
   const token = req.headers.authorization;
-  console.log("server.js: ", token);
+  console.log("server.js: token o");
 
   if (!token) {
     return res.json({ valid: false });

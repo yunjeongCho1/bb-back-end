@@ -89,12 +89,8 @@ router.post("/signin", async (req, res) => {
 
 //회원정보출력 (마이페이지)
 router.get("/info", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization;
-
   try {
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    console.log("Decoded Token:", decoded);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
     console.log("user.js : ", user, +"\n" + "-------------------");
     res.status(200).send(user);
   } catch (error) {
@@ -105,11 +101,9 @@ router.get("/info", authMiddleware, async (req, res) => {
 
 //회원탈퇴
 router.post("/delete_account", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization;
   try {
     const { password } = req.body;
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
     if (user) {
       const pwcheck = await bcrypt.compare(password, user.password);
 
@@ -130,10 +124,8 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
 
 // pw 변경
 router.put("/change_password", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization;
   try {
-    const decoded = jwt.verify(token.split(" ")[1], secret_key);
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(req.user._id);
 
     if (user) {
       const { currentPw, newPw } = req.body;

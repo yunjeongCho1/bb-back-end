@@ -42,7 +42,7 @@ router.post("/", authMiddleware, async (req, res) => {
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    console.log("00000000000000000", user);
+    console.log("mypage user: ", user);
     const recommend = await Recommend.findOne({ userId: user._id.toString() });
     console.log("recommend ", recommend);
     if (!recommend && user) {

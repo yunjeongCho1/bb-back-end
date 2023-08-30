@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const cors = require("cors");
 
 const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
@@ -151,7 +150,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 const fs = require("fs");
 const path = require("path");
 
-router.get("/backup", authMiddleware, cors(), async (req, res) => {
+router.get("/backup", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 

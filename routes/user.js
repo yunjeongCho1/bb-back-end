@@ -106,6 +106,7 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
     const user = await User.findById(req.user._id);
     if (user) {
       const pwcheck = await bcrypt.compare(password, user.password);
+      return res.status(200).send("좀가라");
 
       if (!pwcheck) {
         res.status(200).send("ID or PW error");

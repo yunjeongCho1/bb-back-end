@@ -11,11 +11,7 @@ const cors = require("cors");
     optionsSuccessStatus: 200, // 응답 상태 200으로 설정
   })
 );*/
-app.use(
-  cors({
-    origin: ["http://127.0.0.1:3000", "https://bookbook-phi.vercel.app"],
-  })
-);
+app.use(cors());
 
 const jwt = require("jsonwebtoken");
 

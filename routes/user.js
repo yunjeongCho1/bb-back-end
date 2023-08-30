@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
-const cors = require("cors");
 
 const User = require("../schema/userschema");
 
@@ -101,7 +100,7 @@ router.get("/info", authMiddleware, async (req, res) => {
 });
 
 //회원탈퇴
-router.post("/delete_account", authMiddleware, cors(), async (req, res) => {
+router.post("/delete_account", authMiddleware, async (req, res) => {
   try {
     const { password } = req.body;
     const user = await User.findById(req.user._id);

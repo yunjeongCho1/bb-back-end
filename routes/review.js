@@ -4,6 +4,8 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
 const User = require("../schema/userschema");
+const cors = require("cors");
+router.options("/backup", cors());
 
 require("dotenv").config();
 var secret_key = process.env.SECRET_KEY;
@@ -150,7 +152,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 const fs = require("fs");
 const path = require("path");
 
-router.get("/backup", authMiddleware, async (req, res) => {
+router.get("/backup", cors(), authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
@@ -164,9 +166,7 @@ router.get("/backup", authMiddleware, async (req, res) => {
 
       const backupFileName = `test1_backup.json`;
       const backupFilePath = path.join(__dirname, "backups", backupFileName);
-
       fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
-
       res.download(backupFilePath, backupFileName, () => {
         // 다운로드 후 백업 파일 삭제
         fs.unlinkSync(backupFilePath);

@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 
 const User = require("../schema/userschema");
+const Review = require("../schema/reviewschema");
 
 require("dotenv").config();
 var secret_key = process.env.SECRET_KEY;
@@ -110,7 +111,7 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
       if (!pwcheck) {
         res.status(200).send("ID or PW error");
       } else {
-        const del_reviews = await Review.deleteMany({ user_id: user._id });
+        const del_reviews = await Review.delete({ user_id: user._id });
         const del_user = await User.findByIdAndDelete(user._id);
         console.log("delete: ", del_user);
         res.status(200).json(del_reviews);

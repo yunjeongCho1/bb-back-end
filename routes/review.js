@@ -152,7 +152,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 const fs = require("fs");
 const path = require("path");
 
-router.get("/backup_list", authMiddleware, async (req, res) => {
+router.get("/test", authMiddleware, async (req, res) => {
   //res.status(200).send("0000000000000000");
   try {
     const user = await User.findById(req.user._id);

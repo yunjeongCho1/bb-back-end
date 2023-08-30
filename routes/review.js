@@ -149,36 +149,36 @@ router.put("/:id", authMiddleware, async (req, res) => {
 });
 
 // 백업 backup
-const fs = require("fs");
-const path = require("path");
+//const fs = require("fs");
+//const path = require("path");
 
-router.get("/test", authMiddleware, async (req, res) => {
-  //res.status(200).send("0000000000000000");
-  try {
-    const user = await User.findById(req.user._id);
+router.get("/backup_list", authMiddleware, async (req, res) => {
+  res.status(200).send("0000000000000000");
+  // try {
+  //   const user = await User.findById(req.user._id);
 
-    if (user) {
-      const reviews = await Review.find({ user_id: user._id });
+  //   if (user) {
+  //     const reviews = await Review.find({ user_id: user._id });
 
-      const backupData = {
-        user: user.email,
-        reviews: reviews,
-      };
+  //     const backupData = {
+  //       user: user.email,
+  //       reviews: reviews,
+  //     };
 
-      const backupFileName = `test1_backup.json`;
-      const backupFilePath = path.join(__dirname, "backups", backupFileName);
-      fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
-      res.download(backupFilePath, backupFileName, () => {
-        // 다운로드 후 백업 파일 삭제
-        fs.unlinkSync(backupFilePath);
-      });
-    } else {
-      res.status(500).json({ message: "유저를 찾을 수 없습니다." });
-    }
-  } catch (error) {
-    console.error("user.js backup error:", error.message);
-    res.status(500).send("backup error", error.message);
-  }
+  //     const backupFileName = `test1_backup.json`;
+  //     const backupFilePath = path.join(__dirname, "backups", backupFileName);
+  //     fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
+  //     res.download(backupFilePath, backupFileName, () => {
+  //       // 다운로드 후 백업 파일 삭제
+  //       fs.unlinkSync(backupFilePath);
+  //     });
+  //   } else {
+  //     res.status(500).json({ message: "유저를 찾을 수 없습니다." });
+  //   }
+  // } catch (error) {
+  //   console.error("user.js backup error:", error.message);
+  //   res.status(500).send("backup error", error.message);
+  // }
 });
 
 module.exports = router;

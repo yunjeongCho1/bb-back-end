@@ -160,7 +160,6 @@ router.get("/backup", authMiddleware, async (req, res) => {
       const reviews = await Review.find({ user_id: user._id });
 
       const backupData = {
-        user: user.email,
         reviews: reviews,
       };
 

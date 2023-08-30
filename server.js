@@ -4,12 +4,13 @@ const PORT = 8000;
 
 app.use(express.json());
 var cors = require("cors");
-let corsOptions = {
-  origin: "*", // 출처 허용 옵션
-  credential: true, // 사용자 인증이 필요한 리소스(쿠키 ..등) 접근
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "https://bookbook-phi.vercel.app", // 접근 권한을 부여하는 도메인
+    credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
+    optionsSuccessStatus: 200, // 응답 상태 200으로 설정
+  })
+);
 //app.use(cors());
 
 const jwt = require("jsonwebtoken");

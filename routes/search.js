@@ -12,11 +12,14 @@ var secret_key = process.env.SECRET_KEY;
 
 const jwt = require("jsonwebtoken");
 
+// 책 검색 book search
 router.get("/book", async (req, res) => {
   try {
-    const api_url = `https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=${api_key}&Query=${encodeURI(
+    const api_url = `https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=${api_key}&start=${
+      req.query.page ? req.query.page : 1
+    }&Query=${encodeURI(
       req.query.query
-    )}&QueryType=Title&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
+    )}&QueryType=Title&MaxResults=50&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
     const response = await axios.get(api_url);
     res.status(200).json(response.data);
   } catch (error) {

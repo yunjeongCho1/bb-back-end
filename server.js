@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8000;
 
 app.use(express.json());
-var cors = require("cors");
+const cors = require("cors");
 app.use(
   cors({
     origin: "https://bookbook-phi.vercel.app", // 접근 권한을 부여하는 도메인

@@ -109,12 +109,13 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
 
       if (!pwcheck) {
         res.status(200).send("ID or PW error");
-      } else {
-        await Review.deleteMany({ user_id: user._id });
-        const del_user = await User.findByIdAndDelete(user._id);
-        console.log("delete: ", del_user);
-        res.status(200).json(del_user);
       }
+      // else {
+      //   await Review.deleteMany({ user_id: user._id });
+      //   const del_user = await User.findByIdAndDelete(user._id);
+      //   console.log("delete: ", del_user);
+      //   res.status(200).json(del_user);
+      // }
     }
   } catch (error) {
     console.error("user.js delete error:", error.message);

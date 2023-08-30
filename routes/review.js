@@ -153,7 +153,6 @@ const fs = require("fs");
 const path = require("path");
 
 router.get("/backup", authMiddleware, async (req, res) => {
-  //res.status(200).send("0000000000000000");
   try {
     const user = await User.findById(req.user._id);
 

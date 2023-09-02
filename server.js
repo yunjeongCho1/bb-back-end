@@ -25,7 +25,9 @@ const searchRouter = require("./routes/search");
 const bookRouter = require("./routes/book");
 const likeRouter = require("./routes/like");
 const recommendRouter = require("./routes/recommend");
+const certificationRouter = require("./routes/certification");
 
+app.use("/api/certification", certificationRouter);
 app.use("/api/user", userRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/search", searchRouter);

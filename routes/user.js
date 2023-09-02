@@ -10,7 +10,7 @@ require("dotenv").config();
 var secret_key = process.env.SECRET_KEY;
 const jwt = require("jsonwebtoken");
 
-// user data save
+// user data save 가입
 router.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -123,7 +123,7 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
   }
 });
 
-// pw 변경
+// pw 변경(그냥 pw 바꾸고 싶을 때)
 router.put("/change_password", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);

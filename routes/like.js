@@ -85,7 +85,6 @@ router.get("/list", authMiddleware, async (req, res) => {
     const apiRequests = apiUrls.map((url) => axios.get(url)); // API 요청을 생성하여 배열로 저장
     const apiResponses = await Promise.all(apiRequests); // 모든 API 요청을 병렬로 실행하고 응답을 받음
 
-    //0821에 새로 추가한 코드
     let combinedData = apiResponses.map((response) => response.data.item[0]);
     if (req.query.sort === "date_asc")
       // 정렬

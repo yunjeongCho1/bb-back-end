@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
+const Certification = require("../schema/certificationschema");
 
 const User = require("../schema/userschema");
 const Review = require("../schema/reviewschema");
@@ -16,6 +17,12 @@ router.post("/signup", async (req, res) => {
     const { email, password } = req.body;
     const emailReg = /^[\w.-]+@[a-zA-Z\d.-]+.[a-zA-Z]{2,}$/;
     const passwordReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
+    const result = await Certification.findOne({
+      email,
+    });
+    if (!result || !result.status)
+      return res.status(500).send("Unauthenticated email");
+
     if (emailReg.test(email) && passwordReg.test(password)) {
       const existingUser = await User.findOne({ email });
       if (!existingUser) {

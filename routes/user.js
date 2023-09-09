@@ -10,14 +10,16 @@ const Review = require("../schema/reviewschema");
 require("dotenv").config();
 var secret_key = process.env.SECRET_KEY;
 const jwt = require("jsonwebtoken");
+const Recommend = require("../schema/recommendschema");
 
-// user data save 가입
+//회원가입
 router.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
     const emailReg = /^[\w.-]+@[a-zA-Z\d.-]+.[a-zA-Z]{2,}$/;
     const passwordReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
     const result = await Certification.findOne({
+      //email인증여부
       email,
     });
     if (!result || !result.status)
@@ -29,6 +31,8 @@ router.post("/signup", async (req, res) => {
         const hash = await bcrypt.hash(password, 10);
         const newUser = new User({ email, password: hash });
         await newUser.save();
+        //인증 비우는 code
+        const del_certi = await Certification.deleteOne({ email });
 
         console.log("User registered successfully", newUser);
         res.status(200).send("User registered successfully");
@@ -118,6 +122,7 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
       if (!pwcheck) {
         res.status(200).send("ID or PW error!");
       } else {
+        const del_certi = await Recommend.deleteOne({ userId: user._id }); // 탈퇴할때 user 삭제
         const del_reviews = await Review.deleteMany({ user_id: user._id });
         const del_user = await User.findByIdAndDelete(user._id);
         console.log("delete: ", del_user);
@@ -146,6 +151,28 @@ router.put("/change_password", authMiddleware, async (req, res) => {
       const newPassword = await bcrypt.hash(newPw, 10);
       user.password = newPassword;
       await user.save();
+
+      res
+        .status(200)
+        .json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+    }
+  } catch (error) {
+    console.error("user.js change password error:", error.message);
+    res.status(500).send("PW Error", error.message);
+  }
+});
+
+// 비밀번호 재설정 pw
+router.put("/reset_password", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user) {
+      const newPassword = await bcrypt.hash(password, 10);
+      user.password = newPassword;
+      await user.save();
+      const del_certi = await Certification.deleteOne({ email });
 
       res
         .status(200)

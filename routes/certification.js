@@ -23,7 +23,7 @@ router.post("/send-email", (req, res) => {
   //const email = "yjcho0907@gmail.com"; // 수신자 이메일 주소
   const code = generateRandomCode(); // 인증번호 생성
   const currentTime = new Date();
-  const expiresAt = new Date(currentTime.getTime() + 1 * 60000);
+  const expiresAt = new Date(currentTime.getTime() + 30 * 60000);
 
   // 이메일 옵션 구성
   const mailOptions = {

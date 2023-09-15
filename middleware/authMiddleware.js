@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
-var secret_key = process.env.SECRET_KEY;
+var jwt_secret = process.env.JWT_SECRET;
 
 // Middleware to verify JWT
 module.exports = function (req, res, next) {
@@ -12,7 +12,7 @@ module.exports = function (req, res, next) {
     return res.status(401).json({ message: "No token provided." });
   }
 
-  jwt.verify(token.split(" ")[1], secret_key, (err, decoded) => {
+  jwt.verify(token.split(" ")[1], jwt_secret, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: "Failed to authenticate token." });
     }

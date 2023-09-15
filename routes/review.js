@@ -8,7 +8,7 @@ const User = require("../schema/userschema");
 //router.options("/backup", cors());
 
 require("dotenv").config();
-var secret_key = process.env.SECRET_KEY;
+var jwt_secret = process.env.JWT_SECRET;
 const jwt = require("jsonwebtoken");
 
 // review save/write

@@ -16,7 +16,7 @@ app.use(cors());
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
-var secret_key = process.env.SECRET_KEY;
+var jwt_secret = process.env.JWT_SECRET;
 
 //routes
 const userRouter = require("./routes/user");
@@ -26,7 +26,9 @@ const bookRouter = require("./routes/book");
 const likeRouter = require("./routes/like");
 const recommendRouter = require("./routes/recommend");
 const certificationRouter = require("./routes/certification");
+const googleAuthRouter = require("./routes/googleAuth");
 
+app.use("/auth", googleAuthRouter);
 app.use("/api/certification", certificationRouter);
 app.use("/api/user", userRouter);
 app.use("/api/review", reviewRouter);
@@ -60,7 +62,7 @@ app.get("/api/verify-token", (req, res) => {
     return res.json({ valid: false });
   }
 
-  jwt.verify(token.split(" ")[1], secret_key, (err, decoded) => {
+  jwt.verify(token.split(" ")[1], jwt_secret, (err, decoded) => {
     if (err) {
       return res.json({ valid: false });
     }

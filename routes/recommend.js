@@ -9,7 +9,7 @@ const Review = require("../schema/reviewschema");
 require("dotenv").config();
 var api_key = process.env.API_KEY;
 
-var secret_key = process.env.SECRET_KEY;
+var jwt_secret = process.env.JWT_SECRET;
 const jwt = require("jsonwebtoken");
 
 //추천안쓰는 사용자들

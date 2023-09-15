@@ -8,7 +8,7 @@ const User = require("../schema/userschema");
 const Review = require("../schema/reviewschema");
 
 require("dotenv").config();
-var secret_key = process.env.SECRET_KEY;
+var jwt_secret = process.env.JWT_SECRET;
 const jwt = require("jsonwebtoken");
 const Recommend = require("../schema/recommendschema");
 
@@ -29,7 +29,7 @@ router.post("/signup", async (req, res) => {
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         const hash = await bcrypt.hash(password, 10);
-        const newUser = new User({ email, password: hash });
+        const newUser = new User({ email, password: hash, oauth: false });
         await newUser.save();
         //인증 비우는 code
         const del_certi = await Certification.deleteOne({ email });
@@ -79,8 +79,8 @@ router.post("/signin", async (req, res) => {
         const payload = {
           _id: user._id.toString(),
         };
-        //console.log(secret_key);
-        const token = jwt.sign(payload, secret_key, { expiresIn: "6h" });
+        //console.log(jwt_secret);
+        const token = jwt.sign(payload, jwt_secret, { expiresIn: "6h" });
 
         //response
         res.status(200).json({

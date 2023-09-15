@@ -44,7 +44,13 @@ passport.use(
         id: profile.id,
         email: profile.emails[0].value,
       };
-      const token = jwt.sign(user, process.env.JWT_SECRET);
+
+      const payload = {
+        _id: user.id.toString(),
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "6h",
+      });
       return done(null, token);
     }
   )

@@ -68,10 +68,10 @@ router.post("/signin", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-      //console.log(user.password);
+      if (user.oauth === true) {
+        return res.status(200).send("oauth member");
+      }
       const pwcheck = await bcrypt.compare(password, user.password);
-      console.log("user.js_ id : ", user._id.toString());
-      console.log("user.js_pwcheck : ", pwcheck);
 
       if (!pwcheck) {
         res.status(200).send("ID or PW error");
@@ -79,16 +79,12 @@ router.post("/signin", async (req, res) => {
         const payload = {
           _id: user._id.toString(),
         };
-        //console.log(jwt_secret);
         const token = jwt.sign(payload, jwt_secret, { expiresIn: "6h" });
-
-        //response
         res.status(200).json({
           code: 200,
           message: "토큰이 발급되었습니다.",
           token: token,
         });
-        //console.log(token);
       }
     } else {
       res.status(200).send("ID or PW error");

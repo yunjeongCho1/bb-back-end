@@ -1,3 +1,5 @@
+googleAuth.js;
+
 const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
@@ -44,14 +46,7 @@ passport.use(
         id: profile.id,
         email: profile.emails[0].value,
       };
-
-      const payload = {
-        _id: user.id.toString(),
-      };
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "6h",
-      });
-      return done(null, token);
+      return done(null, user);
     }
   )
 );
@@ -66,28 +61,39 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/" }),
   async (req, res) => {
     // 로그인 성공 > JWT 토큰을 생성하고 리다이렉트할 경로에 추가
-    const token = req.user;
+    const email = req.user.email;
     try {
-      const profile = jwt.verify(token, process.env.JWT_SECRET); // 우리 jwt secret key
-      const email = profile.email;
-      console.log("프로필: ", profile);
-      console.log("이메일: ", email);
-
-      // // 사용자 데이터베이스에서 해당 이메일 검색
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
-        // 사용자가 데이터베이스에 없다면 회원가입
+        // 구글 연동 회원가입
         const newUser = new User({ email, password: "", oauth: true });
         await newUser.save();
+        const payload = {
+          _id: newUser._id.toString(),
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: "6h",
+        });
+        res.redirect(
+          `${process.env.CLIENT_URL}/auth/google/callback?token=${token}`
+        );
       } else if (existingUser.oauth === false) {
         // 이미 일반 이메일 가입한 회원인 경우
         res.redirect(
           `${process.env.CLIENT_URL}/auth/google/callback?userExists=true`
         );
+      } else if (existingUser.oauth === true) {
+        // 구글 연동 로그인
+        const payload = {
+          _id: existingUser._id.toString(),
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: "6h",
+        });
+        res.redirect(
+          `${process.env.CLIENT_URL}/auth/google/callback?token=${token}`
+        );
       }
-      res.redirect(
-        `${process.env.CLIENT_URL}/auth/google/callback?token=${token}`
-      );
     } catch (error) {
       console.error(error);
       res.redirect("/error");

@@ -36,7 +36,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:8000/auth/google/callback",
+      callbackURL: `${process.env.BASE_URL}/auth/google/callback`,
     },
     (accessToken, refreshToken, profile, done) => {
       // 사용자 정보 확인 후 JWT 토큰 생성
@@ -76,10 +76,12 @@ router.get(
       } else if (existingUser.oauth === false) {
         // 이미 일반 이메일 가입한 회원인 경우
         res.redirect(
-          `http://localhost:3000/auth/google/callback?userExists=true`
+          `${process.env.CLIENT_URL}/auth/google/callback?userExists=true`
         );
       }
-      res.redirect(`http://localhost:3000/auth/google/callback?token=${token}`);
+      res.redirect(
+        `${process.env.CLIENT_URL}/auth/google/callback?token=${token}`
+      );
     } catch (error) {
       console.error(error);
       res.redirect("/error");

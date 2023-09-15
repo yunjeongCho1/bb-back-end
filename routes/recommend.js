@@ -61,39 +61,48 @@ router.get("/", authMiddleware, async (req, res) => {
 //real 추천
 router.post("/foryou", authMiddleware, async (req, res) => {
   try {
-    let { categoryId } = req.body;
-    console.log("카테고리", categoryId);
+    const user = await User.findById(req.user._id);
+    const recommend = await Recommend.findOne({ userId: user._id.toString() });
+    if (!recommend && user) {
+      try {
+        let { categoryId } = req.body;
+        let api_url = `http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${api_key}
+        &MaxResults=50&QueryType=Bestseller&CategoryId=${categoryId}&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
 
-    let api_url = `http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${api_key}
-    &MaxResults=50&QueryType=Bestseller&CategoryId=${categoryId}&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
+        const response = await axios.get(api_url);
+        const books = response.data.item;
 
-    const response = await axios.get(api_url);
-    const books = response.data.item;
+        const reviews = await Review.find({
+          user_id: req.user._id,
+          status: "upload",
+        });
+        const isbns = reviews.map((item) => item.book.isbn);
+        const filteredBooks = books.filter(
+          (item) => !isbns.includes(item.isbn13)
+        );
 
-    const reviews = await Review.find({
-      user_id: req.user._id,
-      status: "upload",
-    });
-    const isbns = reviews.map((item) => item.book.isbn);
-    const filteredBooks = books.filter((item) => !isbns.includes(item.isbn13));
+        if (filteredBooks.length === 0) {
+          api_url = `http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${api_key}
+        &MaxResults=50&QueryType=Bestseller&start=2&CategoryId=${categoryId}&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
 
-    if (filteredBooks.length === 0) {
-      api_url = `http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=${api_key}
-    &MaxResults=50&QueryType=Bestseller&start=2&CategoryId=${categoryId}&Cover=Big&SearchTarget=Book&output=js&Version=20131101`;
-
-      const newResponse = await axios.get(api_url);
-      const books = newResponse.data.item;
-      console.log("페이지2", books);
-      const newFilteredBooks = books.filter(
-        (item) => !isbns.includes(item.isbn13)
-      );
-      return res.status(200).send(newFilteredBooks[0]);
+          const newResponse = await axios.get(api_url);
+          const books = newResponse.data.item;
+          const newFilteredBooks = books.filter(
+            (item) => !isbns.includes(item.isbn13)
+          );
+          return res.status(200).send(newFilteredBooks[0]);
+        }
+        return res.status(200).send(filteredBooks[0]);
+      } catch (error) {
+        console.error("Recommend book: ", error);
+        return res.status(500).send("Error: Recommend book for user");
+      }
     }
-    return res.status(200).send(filteredBooks[0]);
-    //console.log("필터북스", filteredBooks);
+    res.status(200).json("Recommend not used");
   } catch (error) {
-    console.error("Error like: ", error);
-    return res.status(500).send("Error like");
+    console.error("사용자 추천 사용 여부 조회 오류: ", error);
+    res.status(500).send(error);
   }
 });
+
 module.exports = router;

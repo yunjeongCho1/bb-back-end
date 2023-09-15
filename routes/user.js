@@ -100,7 +100,13 @@ router.get("/info", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     console.log("user.js : ", user, +"\n" + "-------------------");
-    res.status(200).send(user);
+    const recommend = await Recommend.findOne({ userId: user._id.toString() });
+    console.log("recommend user:", recommend);
+    let result = { email: user.email, recommend: true, oauth: user.oauth };
+    if (recommend && user) {
+      result.recommend = false; // 추천 안 받는 사용자
+    }
+    res.status(200).send(result);
   } catch (error) {
     console.error("Error decoding token:", error.message);
     res.status(500).send("user.js : error", error.message);

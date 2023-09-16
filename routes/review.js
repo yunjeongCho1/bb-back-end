@@ -4,7 +4,6 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
 const User = require("../schema/userschema");
-//const cors = require("cors");
 //router.options("/backup", cors());
 
 require("dotenv").config();
@@ -71,7 +70,7 @@ router.get("/list", authMiddleware, async (req, res) => {
     //console.log("review get:", reviews);
     res.status(200).json(reviews);
   } catch (error) {
-    console.error("Error load reviews: ", error);
+    console.error("Error reviews: ", error);
     res.status(500).send("Error load review");
   }
 });

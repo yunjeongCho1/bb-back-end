@@ -8,7 +8,7 @@ const reviewSchema = new mongoose.Schema(
       title: String,
       author: String,
       publisher: String,
-      image: String,
+      cover: String,
     },
     rating: Number,
     text: String,

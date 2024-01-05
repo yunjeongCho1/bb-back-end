@@ -14,7 +14,7 @@ module.exports = function (req, res, next) {
 
   jwt.verify(token.split(" ")[1], jwt_secret, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ message: "Failed to authenticate token." });
+      return res.status(401).json({ message: "Failed to authenticate token." });
     }
     req.user = decoded; // Store decoded user information for further use
     next();

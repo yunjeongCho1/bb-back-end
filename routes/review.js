@@ -126,7 +126,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
 });
 
 //특정 review 수정
-router.put("/:id", authMiddleware, async (req, res) => {
+router.patch("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, text } = req.body;
@@ -139,7 +139,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
         text: text,
       });
       console.log(up_review);
-      res.status(200).json(up_review);
+      res.status(204).json(up_review);
     }
   } catch (error) {
     console.error("Error update : ", error);

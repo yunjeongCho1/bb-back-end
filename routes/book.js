@@ -26,10 +26,10 @@ router.get("/detail/:id", async (req, res) => {
     if (!response.data.item) {
       const new_url = `http://www.aladin.co.kr/ttb/api/ItemLookUp.aspx?ttbkey=${api_key}&itemIdType=ISBN&ItemId=${req.params.id}&Cover=Big&output=js&Version=20131101`;
       const response = await axios.get(new_url);
-      return res.status(200).json(response.data);
+      return res.status(200).json(response.data.item[0]);
     }
 
-    res.status(200).json(response.data);
+    res.status(200).json(response.data.item[0]);
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred.");

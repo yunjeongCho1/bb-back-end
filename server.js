@@ -1,22 +1,16 @@
 const express = require("express");
 const app = express();
-const PORT = 8000;
-
-app.use(express.json());
 const cors = require("cors");
-/*app.use(
-  cors({
-    origin: "http://localhost:3000", // 접근 권한을 부여하는 도메인
-    credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
-    optionsSuccessStatus: 200, // 응답 상태 200으로 설정
-  })
-);*/
+const compression = require("compression");
+
+app.use(compression());
+app.use(express.json());
+
 app.use(cors());
 
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
-var jwt_secret = process.env.JWT_SECRET;
 
 //routes
 const userRouter = require("./routes/user");
@@ -52,23 +46,6 @@ mongoose
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
-});
-
-app.get("/api/verify-token", (req, res) => {
-  const token = req.headers.authorization;
-  console.log("server.js: token o");
-
-  if (!token) {
-    return res.json({ valid: false });
-  }
-
-  jwt.verify(token.split(" ")[1], jwt_secret, (err, decoded) => {
-    if (err) {
-      return res.json({ valid: false });
-    }
-    // Token is valid
-    return res.json({ valid: true });
-  });
 });
 
 // 포트 8000번 연결

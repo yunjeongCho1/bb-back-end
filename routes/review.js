@@ -4,7 +4,6 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Review = require("../schema/reviewschema");
 const User = require("../schema/userschema");
-//router.options("/backup", cors());
 
 require("dotenv").config();
 var jwt_secret = process.env.JWT_SECRET;
@@ -148,27 +147,13 @@ router.patch("/:id", authMiddleware, async (req, res) => {
 });
 
 // 백업 backup
-const fs = require("fs");
-const path = require("path");
-
 router.get("/backup", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
     if (user) {
       const reviews = await Review.find({ user_id: user._id });
-
-      const backupData = {
-        reviews: reviews,
-      };
-
-      const backupFileName = `test1_backup.json`;
-      const backupFilePath = path.join(__dirname, backupFileName);
-      fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
-      res.download(backupFilePath, backupFileName, () => {
-        // 다운로드 후 백업 파일 삭제
-        fs.unlinkSync(backupFilePath);
-      });
+      const backupData = reviews;
       res.status(200).json(backupData);
     } else {
       res.status(500).json({ message: "유저를 찾을 수 없습니다." });

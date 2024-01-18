@@ -1,7 +1,8 @@
 {
   "headers": {
-    "/**": {
-      "Content-Encoding": "gzip"
+    "/*": {
+      "Content-Encoding": "gzip",
+      "Access-Control-Allow-Origin": ""
     }
   }
 }

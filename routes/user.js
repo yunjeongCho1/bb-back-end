@@ -117,17 +117,15 @@ router.post("/delete_account", authMiddleware, async (req, res) => {
     const { password } = req.body;
     const user = await User.findById(req.user._id);
     if (user) {
-      const pwcheck = await bcrypt.compare(password, user.password);
-
-      if (!pwcheck) {
-        res.status(400).send("ID or PW error!");
-      } else {
-        await Recommend.deleteOne({ userId: user._id }); // 탈퇴할때 user 삭제
-        await Review.deleteMany({ user_id: user._id });
-        const del_user = await User.findByIdAndDelete(user._id);
-        console.log("delete: ", del_user);
-        res.status(204).send(del_user._id);
+      if (!user.oauth) {
+        const pwcheck = await bcrypt.compare(password, user.password);
+        if (!pwcheck) return res.status(400).send("ID or PW error!");
       }
+      await Recommend.deleteOne({ userId: user._id }); // 탈퇴할때 user 삭제
+      await Review.deleteMany({ user_id: user._id });
+      const del_user = await User.findByIdAndDelete(user._id);
+      console.log("delete: ", del_user);
+      res.status(204).send(del_user._id);
     }
   } catch (error) {
     console.error("user.js delete error:", error.message);
